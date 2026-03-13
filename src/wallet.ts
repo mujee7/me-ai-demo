@@ -8,27 +8,25 @@ export interface WalletConnection {
   chainId: number
 }
 
-declare global {
-  interface Window {
-    ethereum?: {
-      isMetaMask?: boolean
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
-      on?: (event: string, handler: (...args: any[]) => void) => void
-      removeListener?: (event: string, handler: (...args: any[]) => void) => void
-    }
-  }
-}
-
 export async function connectMetaMask(): Promise<WalletConnection> {
-  if (!window.ethereum) {
+  const ethereum = window.ethereum as
+    | {
+        isMetaMask?: boolean
+        request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
+        on?: (event: string, handler: (...args: any[]) => void) => void
+        removeListener?: (event: string, handler: (...args: any[]) => void) => void
+      }
+    | undefined
+
+  if (!ethereum) {
     throw new Error('MetaMask not found. Please install MetaMask and try again.')
   }
 
-  const accounts = (await window.ethereum.request({
+  const accounts = (await ethereum.request({
     method: 'eth_requestAccounts',
   })) as string[]
 
-  const chainIdHex = (await window.ethereum.request({
+  const chainIdHex = (await ethereum.request({
     method: 'eth_chainId',
   })) as string
 
@@ -54,7 +52,7 @@ export async function connectWalletConnect(
     wcProvider = await EthereumProvider.init({
       projectId,
       showQrModal: true,
-      chains: [11155111], // Sepolia
+      chains: [11155111],
       optionalChains: [1],
       metadata: {
         name: 'ME.ai POC',
@@ -68,7 +66,8 @@ export async function connectWalletConnect(
           '--wcm-accent-color': '#ef4444',
           '--wcm-accent-fill-color': '#111111',
           '--wcm-background-color': '#050505',
-          '--wcm-font-family': 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
+          '--wcm-font-family':
+            'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
           '--wcm-text-big-bold-size': '18px',
           '--wcm-z-index': '9999',
         },
@@ -92,4 +91,3 @@ export async function connectWalletConnect(
     chainId,
   }
 }
-

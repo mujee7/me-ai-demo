@@ -14,7 +14,7 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 }
 
-const networks = [sepolia]
+const networks = [sepolia] as [typeof sepolia]
 
 export const wagmiAdapter = new WagmiAdapter({
   networks,
@@ -32,18 +32,12 @@ createAppKit({
   features: {
     analytics: false,
   },
-  themeVariables: {
-    "--apkt-accent": "#ff0000",
-    "--apkt-color-mix": "#ff0000",
-    "--apkt-color-mix-strength": 0
-  }
 })
 
 const queryClient = new QueryClient()
 
-export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const Web3Provider = ({ children }: { children: React.ReactNode }) => (
   <WagmiProvider config={wagmiConfig}>
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </WagmiProvider>
 )
-
